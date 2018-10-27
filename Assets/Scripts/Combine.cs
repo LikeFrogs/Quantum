@@ -15,6 +15,8 @@ public class Combine : MonoBehaviour
     [SerializeField] GameObject world1Character;
     [SerializeField] GameObject world2Character;
 
+    [SerializeField] List<BoxCollider> checkpoints;
+
     private void Start()
     {
         activeCharacters = Characters.Both;
@@ -35,7 +37,7 @@ public class Combine : MonoBehaviour
 
 
         //reactive the inactive character at the position of the character that is currently active
-        if (Input.GetKeyDown(KeyCode.Alpha3) && activeCharacters != Characters.Both)
+        if (Input.GetKeyDown(KeyCode.Alpha3) && IsSingleCharacterInCheckpoint())
         {
             EnterSuperPosition();
         }
@@ -102,5 +104,24 @@ public class Combine : MonoBehaviour
     private void LoadCheckpoint()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
+    private bool IsSingleCharacterInCheckpoint()
+    {
+        if(activeCharacters == Characters.Both)
+        {
+            return false;
+        }
+
+        CapsuleCollider collider = ((activeCharacters == Characters.World1) ? world1Character : world2Character).GetComponent<CapsuleCollider>();
+        for (int i = 0; i < checkpoints.Count; i++)
+        {
+            if(collider.bounds.Intersects(checkpoints[i].bounds))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
