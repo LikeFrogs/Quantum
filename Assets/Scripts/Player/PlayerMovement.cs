@@ -9,10 +9,11 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     // Fields
-    // The time it takes to go from 0 to max speed
-    [SerializeField] private float accelerationTime;
-    // The time it takes to go from max speed back to 0
-    [SerializeField] private float deccelerationTime;
+    // How much the force towards the desired velocity should be scaled
+    // Smaller numbers mean floatier control while larger numbers mean snappier response
+    [SerializeField] private float walkForceMultiplier;
+    // How much the force is scaled when the desired velocity is zero
+    [SerializeField] private float stopForceMultiplier;
     // The max speed the player can move at
     [SerializeField] private float maxSpeed;
     // The height the player can jump
@@ -21,16 +22,23 @@ public class PlayerMovement : MonoBehaviour
     // Component references
     private Rigidbody rb;
 
-    private float walkImpulse;
-    private float frictionImpulse;
+    private float jumpImpulse;
 
     // Bools for taking in input to use when calculating player movement
     private Vector2 directionInput;
     private bool jump;
-    
+
+    // How close the desired velocity needs to be to zero for the stop force to kick in
+    private const float stopForceSlop = 0.01f;
+    // How close the current velocity needs to be to zero for the velocity to be zeroed out
+    private const float stopSlop = 0.1f;
+
+    // The distance the probe should cast the rb colliders to test for ground collision
+    private const float probeDist = 0.05f;
 
     // Properties
-    public float AccelerationTime { get { return accelerationTime; } }
+    public float WalkForceMultiplier { get { return walkForceMultiplier; } }
+    public float StopForceMultipliertop { get { return stopForceMultiplier; } }
     public float MaxSpeed { get { return maxSpeed; } }
     public float JumpHeight { get { return jumpHeight; } }
 
@@ -38,9 +46,8 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
-        walkImpulse = maxSpeed / accelerationTime;
-        frictionImpulse = maxSpeed / deccelerationTime;
+        // Do some math to find our initial jump velocity based on the scene gravity
+        jumpImpulse = (2 * jumpHeight) / (Mathf.Sqrt(-2 * jumpHeight / (Physics.gravity.y)));
     }
 
     private void Update()
@@ -50,97 +57,22 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Target speed based on player input
-        Vector2 targetSpeed = directionInput * maxSpeed;
+        Rigidbody groundRigidbody = null;
+        bool grounded = ProbeGround(out groundRigidbody);
 
-        /*
-        // Friction Physics
-        if ((targetSpeed.x == 0 || Mathf.Sign(targetSpeed.x) != Mathf.Sign(rb.velocity.x)) && Mathf.Abs(rb.velocity.x) > 0)
+        DirectionalMovement(groundRigidbody);
+        if (grounded)
         {
-            float velBefore = rb.velocity.x;
-            rb.AddForce(Vector3.left * Mathf.Sign(rb.velocity.x) * frictionImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (Mathf.Sign(velBefore) != Mathf.Sign(rb.velocity.x))
-            {
-                rb.velocity = new Vector3(0, rb.velocity.y, rb.velocity.z);
-            }
-        }
-        if ((targetSpeed.y == 0 || Mathf.Sign(targetSpeed.y) != Mathf.Sign(rb.velocity.z)) && Mathf.Abs(rb.velocity.z) > 0)
-        {
-            float velBefore = rb.velocity.z;
-            rb.AddForce(Vector3.back * Mathf.Sign(rb.velocity.z) * frictionImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (Mathf.Sign(velBefore) != Mathf.Sign(rb.velocity.z))
-            {
-                rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, 0);
-            }
-        }
-        */
-
-        // Movement Physics
-        if (directionInput.x > 0 && rb.velocity.x < targetSpeed.x)
-        {
-            rb.AddForce(Vector3.right * walkImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.x > targetSpeed.x)
-            {
-                rb.velocity.Set(targetSpeed.x, rb.velocity.y, rb.velocity.z);
-            }
-        }
-        else if (directionInput.x < 0 && rb.velocity.x > targetSpeed.x)
-        {
-            rb.AddForce(Vector3.left * walkImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.x < targetSpeed.x)
-            {
-                rb.velocity.Set(targetSpeed.x, rb.velocity.y, rb.velocity.z);
-            }
-        }
-        if (directionInput.y > 0 && rb.velocity.z < targetSpeed.y)
-        {
-            rb.AddForce(Vector3.forward * walkImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.z > targetSpeed.y)
-            {
-                rb.velocity.Set(rb.velocity.x, rb.velocity.y, targetSpeed.y);
-            }
-        }
-        else if (directionInput.y < 0 && rb.velocity.z > targetSpeed.y)
-        {
-            rb.AddForce(Vector3.back * walkImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.z < targetSpeed.y)
-            {
-                rb.velocity.Set(rb.velocity.x, rb.velocity.y, targetSpeed.y);
-            }
+            Jump();
         }
 
-        // Friction Physics
-        if (targetSpeed.x >= 0 && rb.velocity.x < 0)
+        if (rb.velocity.x < stopSlop)
         {
-            rb.AddForce(Vector3.right * frictionImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.x > 0)
-            {
-                rb.velocity.Set(0, rb.velocity.y, rb.velocity.z);
-            }
+            rb.velocity.Set(0, rb.velocity.y, rb.velocity.z);
         }
-        else if (targetSpeed.x <= 0 && rb.velocity.x > 0)
+        if (rb.velocity.z < stopSlop)
         {
-            rb.AddForce(Vector3.left * frictionImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.x < 0)
-            {
-                rb.velocity.Set(0, rb.velocity.y, rb.velocity.z);
-            }
-        }
-        if (targetSpeed.y >= 0 && rb.velocity.z < 0)
-        {
-            rb.AddForce(Vector3.forward * frictionImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.z > 0)
-            {
-                rb.velocity.Set(rb.velocity.x, rb.velocity.y, 0);
-            }
-        }
-        else if (targetSpeed.y <= 0 && rb.velocity.z > 0)
-        {
-            rb.AddForce(Vector3.back * frictionImpulse * Time.fixedDeltaTime, ForceMode.VelocityChange);
-            if (rb.velocity.z < 0)
-            {
-                rb.velocity.Set(rb.velocity.x, rb.velocity.y, 0);
-            }
+            rb.velocity.Set(rb.velocity.x, rb.velocity.y, 0);
         }
     }
 
@@ -150,5 +82,34 @@ public class PlayerMovement : MonoBehaviour
         directionInput.y = Input.GetAxis("Vertical");
         directionInput = Vector2.ClampMagnitude(directionInput, 1.0f);
         jump = Input.GetAxis("Jump") > 0;
+    }
+
+    private void DirectionalMovement(Rigidbody groundRigidbody)
+    {
+        Vector2 groundVelocity = groundRigidbody == null ? Vector2.zero : new Vector2(groundRigidbody.velocity.x, groundRigidbody.velocity.z);
+
+        Vector2 currentRelativeVelocity = new Vector2(rb.velocity.x, rb.velocity.z) - groundVelocity;
+        Vector2 targetRelativeVelocity = directionInput * maxSpeed;
+
+        Vector2 difference = targetRelativeVelocity - currentRelativeVelocity;
+
+        rb.AddForce(new Vector3(difference.x, 0, difference.y) * (targetRelativeVelocity.sqrMagnitude > stopForceSlop ? walkForceMultiplier : stopForceMultiplier));
+    }
+
+    private void Jump()
+    {
+        if (jump)
+        {
+            rb.velocity.Set(rb.velocity.x, 0, rb.velocity.z);
+            rb.AddForce(Vector3.up * jumpImpulse, ForceMode.VelocityChange);
+        }
+    }
+
+    private bool ProbeGround(out Rigidbody hitRigidbody)
+    {
+        RaycastHit hit;
+        bool didHit = rb.SweepTest(Vector3.down, out hit, probeDist, QueryTriggerInteraction.Ignore);
+        hitRigidbody = hit.rigidbody;
+        return didHit;
     }
 }
