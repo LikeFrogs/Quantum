@@ -38,8 +38,8 @@ GameObject:
   - component: {fileID: 4787272200383594}
   - component: {fileID: 33545198238391078}
   - component: {fileID: 23717272858842092}
-  - component: {fileID: 136616882877635994}
-  - component: {fileID: 65079588718357856}
+  - component: {fileID: 136778047582098108}
+  - component: {fileID: 65290959826775336}
   m_Layer: 9
   m_Name: Mesh
   m_TagString: Untagged
@@ -54,7 +54,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1669982547545022}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4787272200383594}
@@ -128,10 +128,10 @@ Rigidbody:
   m_AngularDrag: 0
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
-  m_CollisionDetection: 0
---- !u!65 &65079588718357856
+  m_CollisionDetection: 1
+--- !u!65 &65290959826775336
 BoxCollider:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -158,7 +158,10 @@ MonoBehaviour:
   stopForceMultiplier: 10
   maxSpeed: 10
   jumpHeight: 5
---- !u!136 &136616882877635994
+  useCustomGravity: 1
+  upwardGravityMultiplier: 4
+  downwardGravityMultiplier: 5
+--- !u!136 &136778047582098108
 CapsuleCollider:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
