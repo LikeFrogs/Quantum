@@ -156,6 +156,16 @@ Prefab:
       propertyPath: m_Name
       value: Player World 2
       objectReference: {fileID: 0}
+    - target: {fileID: 23399349793611708, guid: 34cde7cdfb2effe478ecff89a007f2b0,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 136548152543881788, guid: 34cde7cdfb2effe478ecff89a007f2b0,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 34cde7cdfb2effe478ecff89a007f2b0, type: 2}
   m_IsPrefabAsset: 0
@@ -342,7 +352,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4640142621727676, guid: d878be9ae962a1e4bb01575b71d17aae, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4640142621727676, guid: d878be9ae962a1e4bb01575b71d17aae, type: 2}
       propertyPath: m_LocalPosition.z
