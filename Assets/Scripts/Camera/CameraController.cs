@@ -23,6 +23,10 @@ public class CameraController : MonoBehaviour
         // Get the first plane which is the plane
         // made up of the two objects and the forward vector of the camera
         Vector3 vectorBetweenObjects = objectTwo.position - objectOne.position;
+        if (vectorBetweenObjects == Vector3.zero)
+        {
+            vectorBetweenObjects = Vector3.right;
+        }
         Vector3 plane1Normal = Vector3.Cross(transform.forward, vectorBetweenObjects);
         // If the cross product returned the zero vector (becasue the objects line up with the forward of the camera)
         // then just make the plane have the up vector as its normal as any plane will do
@@ -38,12 +42,12 @@ public class CameraController : MonoBehaviour
         // and is rotated by the cameras field of view towards the other object on the plane
 
         // 2nd Plane
-        Vector3 fieldOfViewVectorOfObjectOne = Vector3.RotateTowards(transform.forward * -1, objectTwo.position - objectOne.position, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.5f, 0.0f);
+        Vector3 fieldOfViewVectorOfObjectOne = Vector3.RotateTowards(transform.forward * -1, vectorBetweenObjects, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.5f, 0.0f);
         Vector3 plane2Normal = Vector3.Cross(plane1Normal, fieldOfViewVectorOfObjectOne);
         float plane2W = Vector3.Dot(plane2Normal, objectOne.position);
 
         // Last plane
-        Vector3 fieldOfViewVectorOfObjectTwo = Vector3.RotateTowards(transform.forward * -1, objectOne.position - objectTwo.position, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.5f, 0.0f);
+        Vector3 fieldOfViewVectorOfObjectTwo = Vector3.RotateTowards(transform.forward * -1, -1 * vectorBetweenObjects, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.5f, 0.0f);
         Vector3 plane3Normal = Vector3.Cross(plane1Normal, fieldOfViewVectorOfObjectTwo);
         float plane3W = Vector3.Dot(plane3Normal, objectTwo.position);
 

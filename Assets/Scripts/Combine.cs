@@ -109,6 +109,7 @@ public class Combine : MonoBehaviour
         if (world1Character.activeInHierarchy)
         {
             world2Character.SetActive(true);
+            world2Character.GetComponent<Rigidbody>().velocity = world1Character.GetComponent<Rigidbody>().velocity;
             world2Character.transform.position = world1Character.transform.position;
             world2Character.transform.rotation = world1Character.transform.rotation;
         }
@@ -116,8 +117,9 @@ public class Combine : MonoBehaviour
         else
         {
             world1Character.SetActive(true);
+            world1Character.GetComponent<Rigidbody>().velocity = world2Character.GetComponent<Rigidbody>().velocity;
             world1Character.transform.position = world2Character.transform.position;
-            world1Character.transform.rotation = world2Character.transform.rotation;
+            world1Character.transform.rotation = world2Character.transform.rotation;    
         }
     }
 
@@ -143,7 +145,7 @@ public class Combine : MonoBehaviour
         }
 
         //loop through the checkpoints and check to see if the active character is within one of them
-        CapsuleCollider collider = ((activeCharacters == Characters.World1) ? world1Character : world2Character).GetComponent<CapsuleCollider>();
+        CapsuleCollider collider = ((activeCharacters == Characters.World1) ? world1Character : world2Character).GetComponentInChildren<CapsuleCollider>();
         for (int i = 0; i < checkpoints.Count; i++)
         {
             if(collider.bounds.Intersects(checkpoints[i].bounds))
