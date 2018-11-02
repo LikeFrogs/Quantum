@@ -12,9 +12,19 @@ public class PressurePlate : MonoBehaviour, IPoweredObject {
     private float carriedWeight;
     private bool active = false;
 
+    private void Start()
+    {
+        carriedObjects = new List<Rigidbody>();
+
+        if(network == null)
+        {
+            network = new List<IPoweredObject>();
+        }
+    }
+
     public void OnCollisionEnter(Collision collision)
     {
-        carriedObjects.Add(collision.rigidbody);
+        carriedObjects.Add(collision.collider.attachedRigidbody);
 
         carriedWeight += collision.rigidbody.mass;
 
@@ -26,7 +36,7 @@ public class PressurePlate : MonoBehaviour, IPoweredObject {
 
     public void OnCollisionExit(Collision collision)
     {
-        carriedObjects.Remove(collision.rigidbody);
+        carriedObjects.Remove(collision.collider.attachedRigidbody);
 
         carriedWeight -= collision.rigidbody.mass;
 
@@ -41,6 +51,7 @@ public class PressurePlate : MonoBehaviour, IPoweredObject {
     /// </summary>
     public void Activate()
     {
+        Debug.Log("Pressure Plate Powered!");
         active = true;
         StartCoroutine(ActivateNetwork());
     }
@@ -50,6 +61,7 @@ public class PressurePlate : MonoBehaviour, IPoweredObject {
     /// </summary>
     public void Deactivate()
     {
+        Debug.Log("Pressure Plate Deactivated!");
         active = false;
         StartCoroutine(DeactivateNetwork());
     }
