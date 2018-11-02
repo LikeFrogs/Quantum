@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IPoweredObject {
+public interface IPoweredObject{
 
     /// <summary>
     /// Does whatever the object should do when it recieves power.

@@ -731,7 +731,7 @@ GameObject:
   - component: {fileID: 1093847931}
   - component: {fileID: 1093847930}
   - component: {fileID: 1093847929}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: PressurePlate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -778,7 +778,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: bf8fc61ec61b3044393f897c222d83a6, type: 2}
+  - {fileID: 2100000, guid: d3d7b2bd951d1d8428e12edad0f48f4d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
