@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Light))]
-public class PoweredLight : MonoBehaviour, IPoweredObject {
+public class PoweredLight : PoweredObject {
 
     private Light light;
     private float intensity;
@@ -16,12 +16,12 @@ public class PoweredLight : MonoBehaviour, IPoweredObject {
         light.intensity = 0f;
 	}
 
-    public void Activate()
+    public override void Activate()
     {
         light.intensity = intensity;
     }
 
-    public void Deactivate()
+    public override void Deactivate()
     {
         light.intensity = 0f;
     }
