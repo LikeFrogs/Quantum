@@ -2,15 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IPoweredObject{
+public abstract class PoweredObject : MonoBehaviour{
+
+    protected bool powered;
+
+    public bool Powered
+    {
+        get { return powered; }
+    }
 
     /// <summary>
     /// Does whatever the object should do when it recieves power.
     /// </summary>
-    void Activate();
+    public abstract void Activate();
 
     /// <summary>
     /// Removes power from the object.
     /// </summary>
-    void Deactivate();
+    public abstract void Deactivate();
 }

@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PressurePlate : MonoBehaviour, IPoweredObject {
+public class PressurePlate : PoweredObject {
 
     [SerializeField]
-    private List<IPoweredObject> network;
+    private List<PoweredObject> network;
     private List<Rigidbody> carriedObjects;
     [SerializeField]
     private float activationDelay, activationWeight;
     private float carriedWeight;
-    private bool active = false;
 
     private void Start()
     {
@@ -18,51 +17,59 @@ public class PressurePlate : MonoBehaviour, IPoweredObject {
 
         if(network == null)
         {
-            network = new List<IPoweredObject>();
+            network = new List<PoweredObject>();
         }
     }
 
-    public void OnCollisionEnter(Collision collision)
+    public void OnTriggerEnter(Collider collider)
     {
-        carriedObjects.Add(collision.collider.attachedRigidbody);
-
-        carriedWeight += collision.rigidbody.mass;
-
-        if(!active && carriedWeight >= activationWeight)
+        // Sometimes both of the colliders on the player object hit the plate the third condition
+        // prevents reading the same object twice effectively doubling its weight.
+        if(!carriedObjects.Contains(collider.attachedRigidbody))
         {
-            Activate();
-        }
+            carriedObjects.Add(collider.attachedRigidbody);
+
+            carriedWeight += collider.attachedRigidbody.mass;
+
+            if (!powered && carriedWeight >= activationWeight)
+            {
+                Activate();
+            }
+        } 
     }
 
-    public void OnCollisionExit(Collision collision)
+    public void OnTriggerExit(Collider collider)
     {
-        carriedObjects.Remove(collision.collider.attachedRigidbody);
-
-        carriedWeight -= collision.rigidbody.mass;
-
-        if(active && carriedWeight < activationWeight)
+        // Sometimes both of the colliders on the player object hit the plate the third condition
+        // prevents reading the same object twice effectively doubling its weight.
+        if (carriedObjects.Contains(collider.attachedRigidbody))
         {
-            Deactivate();
+            carriedObjects.Remove(collider.attachedRigidbody);
+
+            carriedWeight -= collider.attachedRigidbody.mass;
+
+            if (powered && carriedWeight < activationWeight)
+            {
+                Deactivate();
+            }
         }
     }
 
     /// <summary>
     /// Activates all objects on its network
     /// </summary>
-    public void Activate()
+    public override void Activate()
     {
-        Debug.Log("Pressure Plate Powered!");
-        active = true;
+        powered = true;
         StartCoroutine(ActivateNetwork());
     }
 
     /// <summary>
     /// Deactivates all objects along it's network
     /// </summary>
-    public void Deactivate()
+    public override void Deactivate()
     {
-        Debug.Log("Pressure Plate Deactivated!");
-        active = false;
+        powered = false;
         StartCoroutine(DeactivateNetwork());
     }
 
@@ -73,8 +80,14 @@ public class PressurePlate : MonoBehaviour, IPoweredObject {
     {
         for (int i = 0; i < network.Count; i++)
         {
-            network[i].Activate();
-            yield return new WaitForSeconds(activationDelay);
+            if (powered)
+            {
+                if (!network[i].Powered)
+                {
+                    network[i].Activate();
+                    yield return new WaitForSeconds(activationDelay);
+                }
+            }
         }
     }
 
@@ -85,8 +98,14 @@ public class PressurePlate : MonoBehaviour, IPoweredObject {
     {
         for (int i = network.Count - 1; i >= 0; i--)
         {
-            network[i].Deactivate();
-            yield return new WaitForSeconds(activationDelay);
+            if (!powered)
+            {
+                if (network[i].Powered)
+                {
+                    network[i].Deactivate();
+                    yield return new WaitForSeconds(activationDelay);
+                }
+            }
         }
     }
 }
