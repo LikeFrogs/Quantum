@@ -21,15 +21,15 @@ public class PressurePlate : PoweredObject {
         }
     }
 
-    public void OnCollisionEnter(Collision collision)
+    public void OnTriggerEnter(Collider collider)
     {
         // Sometimes both of the colliders on the player object hit the plate the third condition
         // prevents reading the same object twice effectively doubling its weight.
-        if(!carriedObjects.Contains(collision.rigidbody))
+        if(!carriedObjects.Contains(collider.attachedRigidbody))
         {
-            carriedObjects.Add(collision.collider.attachedRigidbody);
+            carriedObjects.Add(collider.attachedRigidbody);
 
-            carriedWeight += collision.rigidbody.mass;
+            carriedWeight += collider.attachedRigidbody.mass;
 
             if (!powered && carriedWeight >= activationWeight)
             {
@@ -38,15 +38,15 @@ public class PressurePlate : PoweredObject {
         } 
     }
 
-    public void OnCollisionExit(Collision collision)
+    public void OnTriggerExit(Collider collider)
     {
         // Sometimes both of the colliders on the player object hit the plate the third condition
         // prevents reading the same object twice effectively doubling its weight.
-        if (carriedObjects.Contains(collision.rigidbody))
+        if (carriedObjects.Contains(collider.attachedRigidbody))
         {
-            carriedObjects.Remove(collision.collider.attachedRigidbody);
+            carriedObjects.Remove(collider.attachedRigidbody);
 
-            carriedWeight -= collision.rigidbody.mass;
+            carriedWeight -= collider.attachedRigidbody.mass;
 
             if (powered && carriedWeight < activationWeight)
             {
