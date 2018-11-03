@@ -60,7 +60,6 @@ public class PressurePlate : PoweredObject {
     /// </summary>
     public override void Activate()
     {
-        Debug.Log("Pressure Plate Powered!");
         powered = true;
         StartCoroutine(ActivateNetwork());
     }
@@ -70,7 +69,6 @@ public class PressurePlate : PoweredObject {
     /// </summary>
     public override void Deactivate()
     {
-        Debug.Log("Pressure Plate Deactivated!");
         powered = false;
         StartCoroutine(DeactivateNetwork());
     }
