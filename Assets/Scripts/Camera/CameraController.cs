@@ -7,6 +7,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Transform objectOne;
     [SerializeField] private Transform objectTwo;
 
+    private const float minDistanceToObject = 8.0f;
+
     private void LateUpdate()
     {
         transform.position = GetOptimalCameraPosition();
@@ -42,12 +44,12 @@ public class CameraController : MonoBehaviour
         // and is rotated by the cameras field of view towards the other object on the plane
 
         // 2nd Plane
-        Vector3 fieldOfViewVectorOfObjectOne = Vector3.RotateTowards(transform.forward * -1, vectorBetweenObjects, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.5f, 0.0f);
+        Vector3 fieldOfViewVectorOfObjectOne = Vector3.RotateTowards(transform.forward * -1, vectorBetweenObjects, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.4f, 0.0f);
         Vector3 plane2Normal = Vector3.Cross(plane1Normal, fieldOfViewVectorOfObjectOne);
         float plane2W = Vector3.Dot(plane2Normal, objectOne.position);
 
         // Last plane
-        Vector3 fieldOfViewVectorOfObjectTwo = Vector3.RotateTowards(transform.forward * -1, -1 * vectorBetweenObjects, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.5f, 0.0f);
+        Vector3 fieldOfViewVectorOfObjectTwo = Vector3.RotateTowards(transform.forward * -1, -1 * vectorBetweenObjects, Mathf.Deg2Rad * Camera.main.fieldOfView * 0.4f, 0.0f);
         Vector3 plane3Normal = Vector3.Cross(plane1Normal, fieldOfViewVectorOfObjectTwo);
         float plane3W = Vector3.Dot(plane3Normal, objectTwo.position);
 
@@ -87,6 +89,19 @@ public class CameraController : MonoBehaviour
         optimalCameraPosition.y = -1 * ((f * g - d * i) * q - (c * g - a * i) * r + (c * d - a * f) * s) / ((c * e - b * f) * g - (c * d - a * f) * h + (b * d - a * e) * i);
         optimalCameraPosition.z = ((e * g - d * h) * q - (b * g - a * h) * r + (b * d - a * e) * s) / ((c * e - b * f) * g - (c * d - a * f) * h + (b * d - a * e) * i);
 
+        AddOffset(ref optimalCameraPosition);
+
         return optimalCameraPosition;
+    }
+
+    /// <summary>
+    /// adds an offest to the camera's position if it's too close to an object
+    /// </summary>
+    /// <param name="position">calculated position of the camera</param>
+    private void AddOffset(ref Vector3 position)
+    {
+        float d1 = (position - objectOne.position).magnitude;
+        float d2 = (position - objectTwo.position).magnitude;
+        position += transform.forward * -Mathf.Clamp(minDistanceToObject - (d1 < d2 ? d1 : d2), 0, minDistanceToObject);
     }
 }
