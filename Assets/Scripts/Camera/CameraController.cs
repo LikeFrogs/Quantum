@@ -11,8 +11,28 @@ public class CameraController : MonoBehaviour
 
     private void LateUpdate()
     {
-        transform.position = GetOptimalCameraPosition();
+        transform.position = GetTargetCameraPosition();
     }
+
+    /// <summary>
+    /// Decides what calculation needs to be made to determine position of the camera
+    /// </summary>
+    private Vector3 GetTargetCameraPosition()
+    {
+        //one object is dead and the camera should view the the other one
+        if (!objectOne.gameObject.activeSelf)
+        {
+            return objectTwo.position - transform.forward * minDistanceToObject;
+        }
+        if (!objectTwo.gameObject.activeSelf)
+        {
+            return objectOne.position - transform.forward * minDistanceToObject;
+        }
+
+        //both Objects are alive and optimal posion to fit them both on screen is calculated
+        return GetOptimalCameraPosition();
+    }
+
 
     /// <summary>
     /// Calculates the perfect position for the camera to be in so that object one and object two are just barely inside the field of view.
@@ -100,8 +120,11 @@ public class CameraController : MonoBehaviour
     /// <param name="position">calculated position of the camera</param>
     private void AddOffset(ref Vector3 position)
     {
+        //find the distances between position and objects 
         float d1 = (position - objectOne.position).magnitude;
         float d2 = (position - objectTwo.position).magnitude;
+
+        //move the camera backward localy if smallest distance is less than minimum distance
         position += transform.forward * -Mathf.Clamp(minDistanceToObject - (d1 < d2 ? d1 : d2), 0, minDistanceToObject);
     }
 }
