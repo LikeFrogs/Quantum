@@ -13,7 +13,10 @@ public class Combine : MonoBehaviour
     private Characters activeCharacters;
 
     [SerializeField] GameObject world1Character;
+    [SerializeField] Collider world1Door;
+
     [SerializeField] GameObject world2Character;
+    [SerializeField] Collider world2Door;
 
     [SerializeField] List<BoxCollider> checkpoints;
 
@@ -42,6 +45,11 @@ public class Combine : MonoBehaviour
             EnterSuperPosition();
         }
 
+
+        if(AreBothCharactersInDoors())
+        {
+            LoadCheckpoint();
+        }
         //uncomment to manually control kill a character
         ////combine ("measure out") into world1Character
         //if (Input.GetKeyDown(KeyCode.Alpha2) && activeCharacters == Characters.Both
@@ -152,6 +160,25 @@ public class Combine : MonoBehaviour
             {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    private bool AreBothCharactersInDoors()
+    {
+        if(activeCharacters != Characters.Both)
+        {
+            return false;
+        }
+
+
+        CapsuleCollider world1Collider = world1Character.GetComponentInChildren<CapsuleCollider>();
+        CapsuleCollider world2Collider = world2Character.GetComponentInChildren<CapsuleCollider>();
+
+        if(world1Collider.bounds.Intersects(world1Door.bounds) && world2Collider.bounds.Intersects(world2Door.bounds))
+        {
+            return true;
         }
 
         return false;
