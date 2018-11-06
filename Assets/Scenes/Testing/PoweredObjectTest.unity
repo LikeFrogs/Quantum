@@ -536,6 +536,15 @@ Prefab:
       propertyPath: network
       value: 
       objectReference: {fileID: 1982723278}
+    - target: {fileID: 1360100088042248, guid: 5eed2b49668227148bdf15398705641e, type: 2}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 23572939515500356, guid: 5eed2b49668227148bdf15398705641e,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: bf8fc61ec61b3044393f897c222d83a6, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5eed2b49668227148bdf15398705641e, type: 2}
   m_IsPrefabAsset: 0
