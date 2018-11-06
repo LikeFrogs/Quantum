@@ -5,20 +5,15 @@ using UnityEngine;
 public class PressurePlate : PoweredObject {
 
     [SerializeField]
-    private List<PoweredObject> network;
+    private PowerNetwork network;
     private List<Rigidbody> carriedObjects;
     [SerializeField]
-    private float activationDelay, activationWeight;
+    private float activationWeight;
     private float carriedWeight;
 
     private void Start()
     {
         carriedObjects = new List<Rigidbody>();
-
-        if(network == null)
-        {
-            network = new List<PoweredObject>();
-        }
     }
 
     public void OnTriggerEnter(Collider collider)
@@ -61,7 +56,7 @@ public class PressurePlate : PoweredObject {
     public override void Activate()
     {
         powered = true;
-        StartCoroutine(ActivateNetwork());
+        network.Activate();
     }
 
     /// <summary>
@@ -70,42 +65,6 @@ public class PressurePlate : PoweredObject {
     public override void Deactivate()
     {
         powered = false;
-        StartCoroutine(DeactivateNetwork());
-    }
-
-    /// <summary>
-    /// Activates objects in the network in order with a delay
-    /// </summary>
-    private IEnumerator ActivateNetwork()
-    {
-        for (int i = 0; i < network.Count; i++)
-        {
-            if (powered)
-            {
-                if (!network[i].Powered)
-                {
-                    network[i].Activate();
-                    yield return new WaitForSeconds(activationDelay);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Deactivates objects in the network in reverse order with a delay
-    /// </summary>
-    private IEnumerator DeactivateNetwork()
-    {
-        for (int i = network.Count - 1; i >= 0; i--)
-        {
-            if (!powered)
-            {
-                if (network[i].Powered)
-                {
-                    network[i].Deactivate();
-                    yield return new WaitForSeconds(activationDelay);
-                }
-            }
-        }
+        network.Deactivate();
     }
 }
