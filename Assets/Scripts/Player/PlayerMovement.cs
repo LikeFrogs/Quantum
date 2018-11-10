@@ -125,6 +125,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         ResetVerticalVelocityOnGrounded();
+
+        ResetInput();
     }
 
     private void SetJumpImpulse(float jumpHeight)
@@ -140,7 +142,15 @@ public class PlayerMovement : MonoBehaviour
         xzInput.y = Input.GetAxisRaw("Vertical");
         xzInput = Vector2.ClampMagnitude(xzInput, 1);
 
-        jumpInput = Input.GetButtonDown("Jump");
+        if (Input.GetButtonDown("Jump"))
+        {
+            jumpInput = true;
+        }
+    }
+
+    private void ResetInput()
+    {
+        jumpInput = false;
     }
 
     /// <summary>
@@ -222,12 +232,17 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void ResetVerticalVelocityOnGrounded()
     {
-        if (Grounded && rb.velocity.y < 0)
+        if (Grounded)
         {
             Rigidbody groundBody = Ground.GetComponent<Rigidbody>();
-            rb.velocity = new Vector3(rb.velocity.x, groundBody != null ? groundBody.velocity.y : 0, rb.velocity.z);
+            float relativeYVelocity = groundBody != null ? rb.velocity.y - groundBody.velocity.y : rb.velocity.y;
 
-            transform.position += Vector3.up * (probeVerticalOffset - groundHit.distance);
+            if (relativeYVelocity < 0)
+            {
+                rb.velocity = new Vector3(rb.velocity.x, groundBody != null ? groundBody.velocity.y : 0, rb.velocity.z);
+
+                transform.position += Vector3.up * (probeVerticalOffset - groundHit.distance);
+            }
         }
     }
 
