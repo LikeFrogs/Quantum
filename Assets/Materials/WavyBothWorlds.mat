@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: WavyWorld2
+  m_Name: WavyBothWorlds
   m_Shader: {fileID: 4800000, guid: f96f709b1eeed004cb3f90baac012a9f, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -78,5 +78,5 @@ Material:
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Tint: {r: 0, g: 0.29182243, b: 1, a: 1}
+    - _Tint: {r: 1, g: 1, b: 1, a: 1}
     - _Tit: {r: 1, g: 1, b: 1, a: 1}
