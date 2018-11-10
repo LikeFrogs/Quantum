@@ -2,153 +2,234 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Controls player movement. Player can move in the xz plane and jump. The player has inertia and reacts to outside forces. When the
-/// player stands on a moving object, it will keeps its velocity relative to that object's velocity. The moving object MUST have a rigidbody
-/// with its velocity set. The player can and should be set to use custom gravity forces which make the jump feel less floaty.
-/// KNOWN BUG: If the player jumps exactly as the collider clips the edge of another collider the player will be launched into the air.
-/// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
-    // Fields
-    // How much the force towards the desired velocity should be scaled
-    // Smaller numbers mean floatier control while larger numbers mean snappier response
-    [SerializeField] private float walkForceMultiplier;
-    // How much the force is scaled when the desired velocity is zero
-    [SerializeField] private float stopForceMultiplier;
-    // The max speed the player can move at
-    [SerializeField] private float maxSpeed;
-    // The height the player can jump
-    [SerializeField] private float jumpHeight;
-    // Should the controller apply its own custom gravity to the player instead of using the scene gravity
-    [SerializeField] private bool useCustomGravity;
-    // The up and down gravity multipliers if using custom gravity
-    [SerializeField] private float upwardGravityMultiplier;
-    [SerializeField] private float downwardGravityMultiplier;
+    #region Fields
 
-    // Component references
+    [SerializeField] private float maxWalkSpeed;
+    // These modify how much force is applied in the direction of, orthogonal to, and in the opposite direction of the current velocity
+    [SerializeField] private float accelerationMod;
+    [SerializeField] private float turningMod;
+    [SerializeField] private float brakingMod;
+    [Space]
+    [SerializeField] private float jumpHeight;
+    [SerializeField] private float ascendingGravMod;
+    [SerializeField] private float descendingGravMod;
+    [Space]
+    // The half extent size in the xz plane of the box that the player uses as its feet
+    [SerializeField] private Vector2 feetHalfExtents;
+    // The distance below the center of the player that the probe should sweep
+    [SerializeField] private float probeDist;
+    // The distance above the center of the player that the probe should begin sweeping from
+    [SerializeField] private float probeVerticalOffset;
+    [SerializeField] private LayerMask layerToIgnore;
+    [Space]
+    // Whether or not the movement should start enabled
+    [SerializeField] private bool startEnabled;
+
     private Rigidbody rb;
+
+    private Vector2 xzInput;
+    private bool jumpInput;
 
     private float jumpImpulse;
 
-    // Bools for taking in input to use when calculating player movement
-    private Vector2 directionInput;
-    private bool jump;
+    private RaycastHit groundHit;
+    private const float feetHeight = 0.01f;
 
-    // How close the desired velocity needs to be to zero for the stop force to kick in
-    private const float stopForceSlop = 0.01f;
-    // How close the current velocity needs to be to zero for the velocity to be zeroed out
-    private const float stopSlop = 0.1f;
+    #endregion
 
-    // The distance the probe should cast the rb colliders to test for ground collision
-    private const float probeDist = 0.05f;
+    #region Properties
 
-    // Properties
-    public float WalkForceMultiplier { get { return walkForceMultiplier; } }
-    public float StopForceMultipliertop { get { return stopForceMultiplier; } }
-    public float MaxSpeed { get { return maxSpeed; } }
-    public float JumpHeight { get { return jumpHeight; } }
-    public bool UseCustomGravity { get { return useCustomGravity; } }
+    /// <summary>
+    /// Whether or not the player should be allowed to jump. Allowed by default.
+    /// </summary>
+    public bool CanJump { get; set; }
+    /// <summary>
+    /// Whether or not the player should apply gravity.
+    /// </summary>
+    public bool UseGravity { get; set; }
+    /// <summary>
+    /// Whether or not movement should be enabled. Starts disabled!
+    /// </summary>
+    public bool Enabled { get; set; }
 
-    // Methods
+    /// <summary>
+    /// The ground the player currently thinks it is standing on
+    /// </summary>
+    public GameObject Ground { get; private set; }
+    /// <summary>
+    /// Whether or not the player considers themselves to be on the ground
+    /// </summary>
+    public bool Grounded { get; private set; }
+
+    /// <summary>
+    /// The position of the player in the pure xz plane
+    /// </summary>
+    public Vector2 Position2D { get { return new Vector2(transform.position.x, transform.position.z); } }
+    /// <summary>
+    /// The velocity of the player in the pure xz plane
+    /// </summary>
+    public Vector2 Velocity2D { get { return new Vector2(rb.velocity.x, rb.velocity.z); } }
+
+    /// <summary>
+    /// The max speed the player can try to match
+    /// </summary>
+    public float MaxWalkSpeed { get { return maxWalkSpeed; } set { maxWalkSpeed = value >= 0 ? value : 0; } }
+    /// <summary>
+    /// The jump height of the player
+    /// </summary>
+    public float JumpHeight { get { return jumpHeight; } set { SetJumpImpulse(value); } }
+
+    #endregion
+
+    #region Methods
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
 
-        Vector3 jumpGravity = Physics.gravity;
-        if (useCustomGravity)
-        {
-            rb.useGravity = false;
-            jumpGravity *= upwardGravityMultiplier;
-        }
-        // Do some math to find our initial jump velocity based on the initial jump gravity
-        jumpImpulse = (2 * jumpHeight) / (Mathf.Sqrt(2 * jumpHeight / jumpGravity.magnitude));
+        CanJump = true;
+        UseGravity = true;
+        Enabled = startEnabled;
+
+        SetJumpImpulse(jumpHeight);
+
+        layerToIgnore = ~layerToIgnore;
     }
 
     private void Update()
     {
-        GetInputs();
+        GetInput();
     }
 
     private void FixedUpdate()
     {
-        Rigidbody groundRigidbody = null;
-        bool grounded = ProbeGround(out groundRigidbody);
+        ProbeFeet();
 
-        DirectionalMovement(groundRigidbody);
-        if (useCustomGravity)
+        if (Enabled)
         {
-            CustomGravity();
-        }
-        if (grounded)
-        {
-            Jump();
+            XZMovement();
+
+            if (CanJump)
+            {
+                Jump();
+            }
         }
 
-        if (rb.velocity.x < stopSlop)
+        if (UseGravity)
         {
-            rb.velocity.Set(0, rb.velocity.y, rb.velocity.z);
+            ApplyGravity();
         }
-        if (rb.velocity.z < stopSlop)
-        {
-            rb.velocity.Set(rb.velocity.x, rb.velocity.y, 0);
-        }
+
+        ResetVerticalVelocityOnGrounded();
     }
 
-    private void GetInputs()
+    private void SetJumpImpulse(float jumpHeight)
     {
-        directionInput.x = Input.GetAxis("Horizontal");
-        directionInput.y = Input.GetAxis("Vertical");
-        directionInput = Vector2.ClampMagnitude(directionInput, 1.0f);
-        jump = Input.GetButtonDown("Jump");
+        this.jumpHeight = jumpHeight;
+        float appliedGravity = Physics.gravity.magnitude * ascendingGravMod;
+        jumpImpulse = jumpHeight > 0 ? (2 * jumpHeight) / Mathf.Sqrt(2 * jumpHeight / appliedGravity) : 0;
     }
 
-    private bool ProbeGround(out Rigidbody hitRigidbody)
+    private void GetInput()
     {
-        RaycastHit hit;
-        // THIS IS BROKEN
-        // Sweep Test doesn't return hits with colliders the rigidbody is already colliding with
-        // It only works right now because the capsule collider hovers above the ground and THAT collider is swept into the ground properly
-        bool didHit = rb.SweepTest(Vector3.down, out hit, probeDist, QueryTriggerInteraction.Ignore);
-        hitRigidbody = hit.rigidbody;
-        return didHit;
+        xzInput.x = Input.GetAxisRaw("Horizontal");
+        xzInput.y = Input.GetAxisRaw("Vertical");
+        xzInput = Vector2.ClampMagnitude(xzInput, 1);
+
+        jumpInput = Input.GetButtonDown("Jump");
     }
 
-    private void DirectionalMovement(Rigidbody groundRigidbody)
+    /// <summary>
+    /// Casts a box down from the feet to look for what ground if any the player is standing on
+    /// </summary>
+    private void ProbeFeet()
     {
-        Vector2 groundVelocity = groundRigidbody == null ? Vector2.zero : new Vector2(groundRigidbody.velocity.x, groundRigidbody.velocity.z);
+        Vector3 center = transform.position + Vector3.up * probeVerticalOffset;
+        Vector3 halfExtents = new Vector3(feetHalfExtents.x, feetHeight, feetHalfExtents.y);
 
-        Vector2 currentRelativeVelocity = new Vector2(rb.velocity.x, rb.velocity.z) - groundVelocity;
-        Vector2 targetRelativeVelocity = directionInput * maxSpeed;
+        Grounded = Physics.BoxCast(center, halfExtents, Vector3.down, out groundHit, Quaternion.identity, probeDist + probeVerticalOffset, layerToIgnore, QueryTriggerInteraction.Ignore);
 
-        Vector2 difference = targetRelativeVelocity - currentRelativeVelocity;
+        Ground = Grounded ? groundHit.collider.gameObject : null;
+    }
 
-        // If the current velocity is pointing over 90 degrees from the target velocity then treat the left over vector as being a stop force
-        if (targetRelativeVelocity.sqrMagnitude > stopForceSlop && Vector2.Dot(currentRelativeVelocity, targetRelativeVelocity) < 0)
+    /// <summary>
+    /// Calculates and adds force for accurate movement in the XZ plane
+    /// </summary>
+    private void XZMovement()
+    {
+        Vector2 relativeVelocty = Velocity2D;
+
+        if (Ground != null)
         {
-            Vector2 frictionDif = Vector2.Dot(currentRelativeVelocity, targetRelativeVelocity) * targetRelativeVelocity.normalized * -1;
-            // Add the stop force
-            rb.AddForce(new Vector3(frictionDif.x, 0, frictionDif.y) * stopForceMultiplier, ForceMode.Acceleration);
-            // Remove that part of the force from the difference
-            difference -= frictionDif;
+            Rigidbody groundRigidbody = Ground.GetComponent<Rigidbody>();
+            if (groundRigidbody != null)
+            {
+                relativeVelocty -= new Vector2(groundRigidbody.velocity.x, groundRigidbody.velocity.z);
+            }
         }
 
-        rb.AddForce(new Vector3(difference.x, 0, difference.y) * (targetRelativeVelocity.sqrMagnitude > stopForceSlop ? walkForceMultiplier : stopForceMultiplier), ForceMode.Acceleration);
+        Vector2 desiredRelativeVelocity = xzInput * maxWalkSpeed;
+
+        // Force needed is the force from current velocity to desired velocity
+        Vector2 force = desiredRelativeVelocity - relativeVelocty;
+
+        if (relativeVelocty != Vector2.zero)
+        {
+            // Decompose the force into its components relative to the current velocity
+            Vector2 forceParallelToVel = Vector2.Dot(force, relativeVelocty.normalized) * relativeVelocty.normalized;
+            Vector2 forceOrthogonalToVel = force - forceParallelToVel;
+            // Put the components back together but scale them by the appropriate scaling modifier
+            force = forceOrthogonalToVel * turningMod + forceParallelToVel * (Vector2.Dot(forceParallelToVel, relativeVelocty) >= 0 ? accelerationMod : brakingMod);
+        }
+        else
+        {
+            force *= accelerationMod;
+        }
+
+        rb.AddForce(new Vector3(force.x, 0, force.y));
     }
 
-    private void CustomGravity()
-    {
-        // If you are moving up apply the upward gravity otherwise apply the downward gravity
-        rb.AddForce(Physics.gravity * (rb.velocity.y > 0 ? upwardGravityMultiplier : downwardGravityMultiplier), ForceMode.Acceleration);
-    }
-
+    /// <summary>
+    /// Applies a jump impulse if applicable
+    /// </summary>
     private void Jump()
     {
-        if (jump)
+        if (jumpInput && Grounded)
         {
-            rb.velocity.Set(rb.velocity.x, 0, rb.velocity.z);
+            rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
             rb.AddForce(Vector3.up * jumpImpulse, ForceMode.VelocityChange);
         }
     }
+
+    /// <summary>
+    /// Applys a fake gravity force if the player is found to be not grounded
+    /// </summary>
+    private void ApplyGravity()
+    {
+        if (!Grounded || groundHit.distance > probeVerticalOffset)
+        {
+            rb.AddForce(Physics.gravity * (rb.velocity.y > 0 ? ascendingGravMod : descendingGravMod));
+        }
+    }
+
+    /// <summary>
+    /// Resets the vertical component of the velocity if its on the ground. Also sets the transform to
+    /// line up with the top of the ground collider.
+    /// </summary>
+    private void ResetVerticalVelocityOnGrounded()
+    {
+        if (Grounded && rb.velocity.y < 0)
+        {
+            Rigidbody groundBody = Ground.GetComponent<Rigidbody>();
+            rb.velocity = new Vector3(rb.velocity.x, groundBody != null ? groundBody.velocity.y : 0, rb.velocity.z);
+
+            transform.position += Vector3.up * (probeVerticalOffset - groundHit.distance);
+        }
+    }
+
+    #endregion
 }
