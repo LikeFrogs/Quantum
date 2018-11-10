@@ -10,6 +10,16 @@ public enum Characters { World1, World2, Both, SuperTestPosition }
 /// </summary>
 public class Combine : MonoBehaviour
 {
+    [SerializeField] private Material world1Mat;
+    [SerializeField] private Material world2Mat;
+    [SerializeField] private Material bothWorldMat;
+    [SerializeField] private List<GameObject> world1Phasers;
+    [SerializeField] private List<GameObject> world2Phasers;
+
+    [SerializeField] float distanceToleracne;
+    private bool intersecting;
+    [SerializeField] GameObject mysteriousThirdCylinder;
+
     [SerializeField] CameraController cameraController;
     private bool introScrolling = true;
 
@@ -49,7 +59,7 @@ public class Combine : MonoBehaviour
         }
 
 
-        //reactive the inactive character at the position of the character that is currently active
+        //reactiveate the inactive character at the position of the character that is currently active
         if (Input.GetKeyDown(KeyCode.Alpha3) && IsSingleCharacterInCheckpoint())
         {
             EnterSuperPosition();
@@ -67,6 +77,37 @@ public class Combine : MonoBehaviour
         {
             cameraController.SetCameraTargets(world1Character.transform, world2Character.transform);
             introScrolling = false;
+        }
+
+        if(AreCharactersOverlapping())
+        {
+            if(!intersecting)
+            {
+                MergeCharacters();
+            }
+
+            intersecting = true;
+        }
+        else
+        {
+            if(intersecting)
+            {
+                UnMerge();
+            }
+
+            intersecting = false;
+        }
+
+        if(intersecting)
+        {
+            SetCharactersOverlapping();
+        }
+        else
+        {
+            mysteriousThirdCylinder.SetActive(false);
+
+            world1Character.GetComponentInChildren<Renderer>().enabled = true;
+            world2Character.GetComponentInChildren<Renderer>().enabled = true;
         }
 
         //uncomment to manually control kill a character
@@ -211,5 +252,66 @@ public class Combine : MonoBehaviour
         }
 
         return false;
+    }
+
+    private bool AreCharactersOverlapping()
+    {
+        if(activeCharacters != Characters.Both)
+        {
+            return false;
+        }
+
+        if((world1Character.transform.position - world2Character.transform.position).sqrMagnitude < distanceToleracne)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void SetCharactersOverlapping()
+    {
+        mysteriousThirdCylinder.transform.position = new Vector3((world1Character.transform.position.x + world2Character.transform.position.x) / 2,
+                                                         (world1Character.transform.position.y + world2Character.transform.position.y) / 2 + 1,
+                                                         (world1Character.transform.position.z + world2Character.transform.position.z) / 2);
+    }
+
+    private void MergeCharacters()
+    {
+        world1Character.transform.position = new Vector3((world1Character.transform.position.x + world2Character.transform.position.x) / 2,
+                                                         (world1Character.transform.position.y + world2Character.transform.position.y) / 2,
+                                                         (world1Character.transform.position.z + world2Character.transform.position.z) / 2);
+        world2Character.transform.position = world1Character.transform.position;
+
+        mysteriousThirdCylinder.SetActive(true);
+        mysteriousThirdCylinder.transform.position = world1Character.transform.position;
+
+        world1Character.GetComponentInChildren<Renderer>().enabled = false;
+        world2Character.GetComponentInChildren<Renderer>().enabled = false;
+
+        for (int i = 0; i < world1Phasers.Count; i++)
+        {
+            world1Phasers[i].layer = 11;
+            world1Phasers[i].GetComponent<Renderer>().material = bothWorldMat;
+        }
+        for (int i = 0; i < world2Phasers.Count; i++)
+        {
+            world2Phasers[i].layer = 11;
+            world2Phasers[i].GetComponent<Renderer>().material = bothWorldMat;
+        }
+    }
+
+    private void UnMerge()
+    {
+        for (int i = 0; i < world1Phasers.Count; i++)
+        {
+            world1Phasers[i].layer = 9;
+            world1Phasers[i].GetComponent<Renderer>().material = world1Mat;
+        }
+        for (int i = 0; i < world2Phasers.Count; i++)
+        {
+            world2Phasers[i].layer = 10;
+            world2Phasers[i].GetComponent<Renderer>().material = world2Mat;
+        }
     }
 }
