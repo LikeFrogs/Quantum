@@ -56,13 +56,28 @@ Shader "Custom/QuantumObject"
 			float4 FragmentProgram(Interpolators i) : SV_TARGET {
 				//return float4(i.uv, 1, 1);
 				float4 col = _Tint;
-				col.a = tex2D(_PerlinTex, i.uv);
+				//col.a = tex2D(_PerlinTex, i.uv);
 				//return tex2D(_PerlinTex, i.uv) * _Tint;
 				col = tex2D(_PerlinTex, i.uv);
 				col = col + _Tint;
 				col.a = 0.5;
-				clip(col.r - 0.3);
+				
 				//col = float4(col.r, col.g, col.b, 0.5);
+
+
+
+				//float edge = abs(0.5 - i.uv.x )  + abs(0.5 - i.uv.y);
+				//float edge = (abs(0.5 - i.uv.x) + 0.5) * (abs(0.5 - i.uv.y) + 0.5f);
+				float edge = abs(0.5 - i.uv.x) + abs(0.5 - i.uv.y);
+				edge = edge * 2 - 2;
+
+
+
+				col = col + float4(edge, edge, edge, 1.0);
+				//col = float4(col.r * 0.25, col.g * 0.5, col.b, col.a);
+				col.b = col.b + 0.4;
+				//col = col + _Tint * 0.3;
+				//clip(col.r * col.g * col.b );
 				return col;
 			}
 			
