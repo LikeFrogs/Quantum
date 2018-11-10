@@ -16,7 +16,7 @@ public class BlockMover : MonoBehaviour
     private void OnTriggerEnter(Collider collider)
     {
         //if this is already holding the object it collides with, do not set unheldObject to it
-        if(heldBlock != null && collider.gameObject == heldBlock.gameObject) { return; }
+        if(heldBlock != null) { return; }
 
         //if the collided with object is a moveable block set unheldObject to be that object
         if(collider.gameObject.tag == "MoveableBlock")
@@ -72,5 +72,15 @@ public class BlockMover : MonoBehaviour
             unheldBlock = heldBlock;
             heldBlock = null;
         }
+    }
+
+    public void Disable()
+    {
+        if(heldBlock != null)
+        {
+            heldBlock.transform.SetParent(null);
+        }
+        unheldBlock = null;
+        heldBlock = null;
     }
 }

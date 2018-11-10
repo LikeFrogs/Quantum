@@ -8,10 +8,31 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Transform objectTwo;
 
     private const float minDistanceToObject = 8.0f;
+    
 
     private void LateUpdate()
     {
         transform.position = Vector3.Lerp(transform.position, GetTargetCameraPosition(), 0.1f);
+    }
+
+    /// <summary>
+    /// Sets the targets for the camera to follow
+    /// </summary>
+    /// <param name="targetOne">The first target</param>
+    /// <param name="targetTwo">The second target</param>
+    public void SetCameraTargets(Transform targetOne, Transform targetTwo)
+    {
+        objectOne = targetOne;
+        objectTwo = targetTwo;
+    }
+
+    /// <summary>
+    /// Checks to see if the camera is in the ideal position
+    /// </summary>
+    /// <returns>True if the camera is where it should be</returns>
+    public bool IsInTargetPosition()
+    {
+        return (transform.position - GetTargetCameraPosition()).sqrMagnitude < .01f;
     }
 
     /// <summary>
