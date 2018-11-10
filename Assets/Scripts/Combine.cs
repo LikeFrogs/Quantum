@@ -10,12 +10,17 @@ public enum Characters { World1, World2, Both, SuperTestPosition }
 /// </summary>
 public class Combine : MonoBehaviour
 {
+    [SerializeField] CameraController cameraController;
+    private bool introScrolling = true;
+
     private Characters activeCharacters;
 
     [SerializeField] GameObject world1Character;
+    private BlockMover world1BlockMover;
     [SerializeField] Collider world1Door;
 
     [SerializeField] GameObject world2Character;
+    private BlockMover world2BlockMover;
     [SerializeField] Collider world2Door;
 
     [SerializeField] List<BoxCollider> checkpoints;
@@ -23,6 +28,11 @@ public class Combine : MonoBehaviour
     private void Start()
     {
         activeCharacters = Characters.Both;
+
+        world1BlockMover = world1Character.GetComponent<BlockMover>();
+        world2BlockMover = world2Character.GetComponent<BlockMover>();
+
+        cameraController.SetCameraTargets(world1Door.transform, world2Door.transform);
     }
 
     // Update is called once per frame
@@ -45,11 +55,20 @@ public class Combine : MonoBehaviour
             EnterSuperPosition();
         }
 
-
+        //handle respawning at checkpoints
         if(AreBothCharactersInDoors())
         {
             LoadCheckpoint();
         }
+
+
+        //update the camera tracking after the exit has been shown
+        if(introScrolling && cameraController.IsInTargetPosition())
+        {
+            cameraController.SetCameraTargets(world1Character.transform, world2Character.transform);
+            introScrolling = false;
+        }
+
         //uncomment to manually control kill a character
         ////combine ("measure out") into world1Character
         //if (Input.GetKeyDown(KeyCode.Alpha2) && activeCharacters == Characters.Both
@@ -82,6 +101,9 @@ public class Combine : MonoBehaviour
         //sets the active character to be only world 2
         activeCharacters = Characters.World2;
 
+        //deal with anything the deactivating character is holding
+        world1BlockMover.Disable();
+
         //turn off world 1 character 
         world1Character.SetActive(false);
     }
@@ -100,6 +122,9 @@ public class Combine : MonoBehaviour
 
         //sets the active character to be only world 1
         activeCharacters = Characters.World1;
+
+        //deal with anything the deactivating character is holding
+        world2BlockMover.Disable();
 
         //turn off world 2 character
         world2Character.SetActive(false);
@@ -165,6 +190,10 @@ public class Combine : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Checks to see if both characters are in their respective level end doors
+    /// </summary>
+    /// <returns>True if the characters are in their doors</returns>
     private bool AreBothCharactersInDoors()
     {
         if(activeCharacters != Characters.Both)
