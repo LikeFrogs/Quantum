@@ -8,6 +8,7 @@ public enum Characters { World1, World2, Both, SuperTestPosition }
 /// Handles the combining and uncombining of the player characters based on user input.
 /// As well as handling death and respawning
 /// </summary>
+<<<<<<< HEAD
 public class Combine : MonoBehaviour
 {
     [SerializeField] private Material world1Mat;
@@ -20,6 +21,9 @@ public class Combine : MonoBehaviour
     private bool intersecting;
     [SerializeField] GameObject mysteriousThirdCylinder;
 
+=======
+public class Combine : MonoBehaviour {
+>>>>>>> UI
     [SerializeField] CameraController cameraController;
     private bool introScrolling = true;
 
@@ -49,32 +53,33 @@ public class Combine : MonoBehaviour
     void Update()
     {
         //kill characters if they are at a certain height
-        if(world1Character.transform.position.y <= -10)
-        {
+        if(world1Character.transform.position.y <= -10) {
             KillCharacter1();
         }
-        if(world2Character.transform.position.y <= -10)
-        {
+        if(world2Character.transform.position.y <= -10) {
             KillCharacter2();
         }
 
 
+<<<<<<< HEAD
         //reactiveate the inactive character at the position of the character that is currently active
         if (Input.GetKeyDown(KeyCode.Alpha3) && IsSingleCharacterInCheckpoint())
         {
+=======
+        //reactive the inactive character at the position of the character that is currently active
+        if (Input.GetKeyDown(KeyCode.Alpha3) && IsSingleCharacterInCheckpoint()) {
+>>>>>>> UI
             EnterSuperPosition();
         }
 
         //handle respawning at checkpoints
-        if(AreBothCharactersInDoors())
-        {
+        if(AreBothCharactersInDoors()) {
             LoadCheckpoint();
         }
 
 
         //update the camera tracking after the exit has been shown
-        if(introScrolling && cameraController.IsInTargetPosition())
-        {
+        if(introScrolling && cameraController.IsInTargetPosition()) {
             cameraController.SetCameraTargets(world1Character.transform, world2Character.transform);
             introScrolling = false;
         }
