@@ -6,15 +6,16 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems; // Required when using Event data.
 
 [RequireComponent(typeof(Image))]
-public class SceneButton : Selectable {
+public class SceneButton : Selectable
+{
 
     [SerializeField] private string sceneName;
     [SerializeField] private LoadSceneMode loadMode;
 
-    private Image img;
+    protected Image img;
 
-    [SerializeField] private Sprite normal;
-    [SerializeField] private Sprite hover;
+    [SerializeField] protected Sprite normal;
+    [SerializeField] protected Sprite hover;
 
     // Use this for initialization
     protected override void Awake()
@@ -25,14 +26,12 @@ public class SceneButton : Selectable {
     public override void OnPointerEnter(PointerEventData eventData)
     {
         base.OnPointerEnter(eventData);
-
         img.sprite = hover;
     }
 
     public override void OnPointerExit(PointerEventData eventData)
     {
         base.OnPointerExit(eventData);
-
         img.sprite = normal;
     }
 
