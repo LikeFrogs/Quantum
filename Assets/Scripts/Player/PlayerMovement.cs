@@ -38,6 +38,8 @@ public class PlayerMovement : MonoBehaviour
     private RaycastHit groundHit;
     private const float feetHeight = 0.01f;
 
+    private const float rotationStrength = 0.2f;
+
     #endregion
 
     #region Properties
@@ -96,8 +98,6 @@ public class PlayerMovement : MonoBehaviour
         Enabled = startEnabled;
 
         SetJumpImpulse(jumpHeight);
-
-        layerToIgnore = ~layerToIgnore;
     }
 
     private void Update()
@@ -123,6 +123,8 @@ public class PlayerMovement : MonoBehaviour
         {
             ApplyGravity();
         }
+
+        RotateTowardsInput();
 
         ResetVerticalVelocityOnGrounded();
 
@@ -161,7 +163,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 center = transform.position + Vector3.up * probeVerticalOffset;
         Vector3 halfExtents = new Vector3(feetHalfExtents.x, feetHeight, feetHalfExtents.y);
 
-        Grounded = Physics.BoxCast(center, halfExtents, Vector3.down, out groundHit, Quaternion.identity, probeDist + probeVerticalOffset, layerToIgnore, QueryTriggerInteraction.Ignore);
+        Grounded = Physics.BoxCast(center, halfExtents, Vector3.down, out groundHit, Quaternion.identity, probeDist + probeVerticalOffset, ~layerToIgnore, QueryTriggerInteraction.Ignore);
 
         Ground = Grounded ? groundHit.collider.gameObject : null;
     }
@@ -224,6 +226,16 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.AddForce(Physics.gravity * (rb.velocity.y > 0 ? ascendingGravMod : descendingGravMod));
         }
+    }
+
+    private void RotateTowardsInput()
+    {
+        if (xzInput == Vector2.zero)
+        {
+            return;
+        }
+
+        transform.forward = Vector3.Slerp(transform.forward, new Vector3(xzInput.x, 0, xzInput.y), rotationStrength);
     }
 
     /// <summary>

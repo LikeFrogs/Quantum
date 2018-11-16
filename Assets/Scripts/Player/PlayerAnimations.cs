@@ -79,9 +79,13 @@ public class PlayerAnimations : MonoBehaviour {
 
         JumpVelocity = rb.velocity.y;
 
-        if(MoveSpeed > deadZone)
-        {
-            transform.rotation = Quaternion.Euler(0, Mathf.Atan2(movementController.Velocity2D.y * -1, movementController.Velocity2D.x) * Mathf.Rad2Deg - 90, 0);
-        }
+        // THIS SHOULD NOT BE HERE
+        // Rotation should be handled by the player movement script
+        // I have moved my rotation code there
+        // - Matthew
+        //if(MoveSpeed > deadZone)
+        //{
+        //    transform.rotation = Quaternion.Euler(0, Mathf.Atan2(movementController.Velocity2D.y * -1, movementController.Velocity2D.x) * Mathf.Rad2Deg - 90, 0);
+        //}
     }
 }
