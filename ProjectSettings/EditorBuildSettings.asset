@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Testing/MainMenu.unity
     guid: 14d41156725cbd946aa84e19f2164fbe
   - enabled: 1
-    path: Assets/Scenes/SampleLevels/IntoToPlates.unity
+    path: Assets/Scenes/SampleLevels/IntroToPlates.unity
     guid: 688eaed676f772e45b65cb289b180f8e
   - enabled: 1
     path: Assets/Scenes/SampleLevels/Level1.unity
