@@ -161,6 +161,7 @@ GameObject:
   - component: {fileID: 54722743755992968}
   - component: {fileID: 114773441293065252}
   - component: {fileID: 114159446246382842}
+  - component: {fileID: 114139558972742136}
   m_Layer: 10
   m_Name: Player World 2
   m_TagString: Untagged
@@ -514,6 +515,18 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &114139558972742136
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1501025902937902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b7ea4777d8fc9b45ad0e1fee5a51530, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  otherBlockMover: {fileID: 0}
 --- !u!114 &114159446246382842
 MonoBehaviour:
   m_ObjectHideFlags: 1
