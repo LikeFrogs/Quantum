@@ -40,6 +40,11 @@ public class Combine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            LoadCheckpoint();
+        }
+
         //kill characters if they are at a certain height
         if (world1Character.transform.position.y <= -10)
         {

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/SampleLevels/Level1.unity
+    guid: b451ff9f2be768540b771ffcc27ce985
+  - enabled: 1
     path: Assets/Scenes/Testing/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
@@ -15,9 +18,15 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleLevels/IntroToPlates.unity
     guid: 688eaed676f772e45b65cb289b180f8e
   - enabled: 1
-    path: Assets/Scenes/SampleLevels/Level1.unity
-    guid: b451ff9f2be768540b771ffcc27ce985
-  - enabled: 1
     path: Assets/Scenes/SampleLevels/PlatesandElevators.unity
     guid: 7e2cfb995205a5448b4e07e24d14e6f0
+  - enabled: 1
+    path: Assets/Scenes/SampleLevels/FancyBridge.unity
+    guid: 957ea14d0e504654cbccf403fe046d8c
+  - enabled: 1
+    path: Assets/Scenes/SampleLevels/IntroToCheckpoints.unity
+    guid: b14c327f379173f4d8d73fbf268604a3
+  - enabled: 1
+    path: Assets/Scenes/SampleLevels/MergeBridge.unity
+    guid: 7d3030d3391d84a44a2e16389fb9644d
   m_configObjects: {}
