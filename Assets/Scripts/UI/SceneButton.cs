@@ -38,6 +38,14 @@ public class SceneButton : Selectable
     public override void OnSelect(BaseEventData eventData)
     {
         base.OnSelect(eventData);
-        SceneManager.LoadScene(sceneName, loadMode);
+
+        if (sceneName == "Exit")
+        {
+            Application.Quit();
+        }
+        else
+        {
+            SceneManager.LoadScene(sceneName, loadMode);
+        }
     }
 }
