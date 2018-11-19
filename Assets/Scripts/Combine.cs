@@ -45,6 +45,11 @@ public class Combine : MonoBehaviour
             LoadCheckpoint();
         }
 
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        }
+
         //kill characters if they are at a certain height
         if (world1Character.transform.position.y <= -10)
         {
