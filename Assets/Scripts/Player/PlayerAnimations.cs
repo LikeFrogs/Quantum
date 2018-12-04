@@ -39,27 +39,12 @@ public class PlayerAnimations : MonoBehaviour {
     }
 
     /// <summary>
-    /// Whether or not the player is grounded calls the corresponding triggers
-    /// in the animator for when the player jumps or lands
+    /// Whether or not the player is grounded
     /// </summary>
     public bool Grounded
     {
-        set
-        {
-            if(value != grounded)
-            {
-                if (value)
-                {
-                    animator.SetTrigger("Land");
-                }
-                else
-                {
-                    animator.SetTrigger("Jump");
-                }
-
-                grounded = value;
-            }
-        }
+        get { return animator.GetBool("Grounded"); }
+        set { animator.SetBool("Grounded", value); }
     }
 
     private void Start()
@@ -78,14 +63,5 @@ public class PlayerAnimations : MonoBehaviour {
         MoveAnimationMultiplier = MoveSpeed / defaultMoveSpeed;
 
         JumpVelocity = rb.velocity.y;
-
-        // THIS SHOULD NOT BE HERE
-        // Rotation should be handled by the player movement script
-        // I have moved my rotation code there
-        // - Matthew
-        //if(MoveSpeed > deadZone)
-        //{
-        //    transform.rotation = Quaternion.Euler(0, Mathf.Atan2(movementController.Velocity2D.y * -1, movementController.Velocity2D.x) * Mathf.Rad2Deg - 90, 0);
-        //}
     }
 }
