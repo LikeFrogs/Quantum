@@ -17,8 +17,6 @@ public class ToggleSwitch : PoweredObject {
     {
         powered = network.Powered;
 
-        Debug.Log("Powered: " + powered + ", Players in range: " + playersInRange);
-
         if (Input.GetKeyDown(KeyCode.E))
         {
             if(playersInRange > 0)
