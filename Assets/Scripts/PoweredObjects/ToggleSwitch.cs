@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class ToggleSwitch : PoweredObject {
 
     [SerializeField]
     private PowerNetwork network;
     private int playersInRange;
 
+    private Animator animator;
+
     private void Start()
     {
+        animator = GetComponent<Animator>();
+
         playersInRange = 0;
     }
 
@@ -61,6 +66,7 @@ public class ToggleSwitch : PoweredObject {
     public override void Activate()
     {
         powered = true;
+        animator.SetTrigger("Toggled");
         network.Activate();
     }
 
@@ -70,6 +76,7 @@ public class ToggleSwitch : PoweredObject {
     public override void Deactivate()
     {
         powered = false;
+        animator.SetTrigger("Toggled");
         network.Deactivate();
     }
 }

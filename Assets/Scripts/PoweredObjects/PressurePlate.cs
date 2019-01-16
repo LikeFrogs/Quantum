@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Animator))]
 public class PressurePlate : PoweredObject {
 
     [SerializeField]
@@ -11,8 +12,12 @@ public class PressurePlate : PoweredObject {
     private float activationWeight;
     private float carriedWeight;
 
+    private Animator animator;
+
     private void Start()
     {
+        animator = GetComponent<Animator>();
+
         carriedObjects = new List<Rigidbody>();
     }
 
@@ -56,6 +61,7 @@ public class PressurePlate : PoweredObject {
     public override void Activate()
     {
         powered = true;
+        animator.SetBool("Powered", powered);
         network.Activate();
     }
 
@@ -65,6 +71,7 @@ public class PressurePlate : PoweredObject {
     public override void Deactivate()
     {
         powered = false;
+        animator.SetBool("Powered", powered);
         network.Deactivate();
     }
 }

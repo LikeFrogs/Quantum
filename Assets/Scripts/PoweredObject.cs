@@ -5,7 +5,7 @@ using UnityEngine;
 public abstract class PoweredObject : MonoBehaviour{
 
     protected bool powered;
-
+    
     public bool Powered
     {
         get { return powered; }
