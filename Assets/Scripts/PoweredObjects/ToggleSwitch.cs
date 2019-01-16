@@ -6,20 +6,22 @@ public class ToggleSwitch : PoweredObject {
 
     [SerializeField]
     private PowerNetwork network;
-    private List<PlayerMovement> playersInRange;
+    private int playersInRange;
 
     private void Start()
     {
-        playersInRange = new List<PlayerMovement>();
+        playersInRange = 0;
     }
 
     private void Update()
     {
         powered = network.Powered;
 
+        Debug.Log("Powered: " + powered + ", Players in range: " + playersInRange);
+
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if(playersInRange.Count > 0)
+            if(playersInRange > 0)
             {
                 if (!powered)
                 {
@@ -40,7 +42,7 @@ public class ToggleSwitch : PoweredObject {
     {
         if(other.tag == "Player")
         {
-            playersInRange.Add(other.GetComponent<PlayerMovement>());
+            playersInRange++;
         }
     }
 
@@ -51,7 +53,7 @@ public class ToggleSwitch : PoweredObject {
     {
         if(other.tag == "Player")
         {
-            playersInRange.Remove(other.GetComponent<PlayerMovement>());
+            playersInRange--;
         }
     }
 

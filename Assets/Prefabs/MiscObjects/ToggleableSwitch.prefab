@@ -108,10 +108,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03782dfcc49e7f54793ed4f30cb66fd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  network:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  activationDelay: 0.2
+  network: {fileID: 0}
